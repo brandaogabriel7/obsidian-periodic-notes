@@ -5,6 +5,7 @@ declare module "obsidian" {
   interface CliData {
     args: string[];
     cwd: string;
+    [key: string]: string | string[] | undefined;
   }
 
   type CliHandler = (args: CliData) => Promise<string>;

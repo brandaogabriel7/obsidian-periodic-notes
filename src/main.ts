@@ -130,22 +130,33 @@ export default class PeriodicNotesPlugin extends Plugin {
       const description = config.labelOpenPresent.replace("Open", "Create/open");
       const label = `${config.periodicity.charAt(0).toUpperCase()}${config.periodicity.slice(1)} notes`;
 
-      this.registerCliHandler(command, description, null, async () => {
-        const activeGranularities = this.calendarSetManager.getActiveGranularities();
-        if (!activeGranularities.includes(granularity)) {
-          return `Warning: ${label} are not enabled. Enable in Settings → Periodic Notes.`;
-        }
+      this.registerCliHandler(
+        command,
+        description,
+        { open: { description: "Open the note in Obsidian", type: "boolean" } },
+        async (data) => {
+          const activeGranularities = this.calendarSetManager.getActiveGranularities();
+          if (!activeGranularities.includes(granularity)) {
+            return `Warning: ${label} are not enabled. Enable in Settings → Periodic Notes.`;
+          }
 
-        try {
-          const date = window.moment();
-          const file =
-            this.getPeriodicNote(granularity, date) ??
-            (await this.createPeriodicNote(granularity, date));
-          return file.path;
-        } catch (e) {
-          return `Error: ${e instanceof Error ? e.message : String(e)}`;
+          try {
+            const date = window.moment();
+            const file =
+              this.getPeriodicNote(granularity, date) ??
+              (await this.createPeriodicNote(granularity, date));
+
+            if (data?.open === "true") {
+              const leaf = this.app.workspace.getUnpinnedLeaf();
+              await leaf.openFile(file, { active: true });
+            }
+
+            return file.path;
+          } catch (e) {
+            return `Error: ${e instanceof Error ? e.message : String(e)}`;
+          }
         }
-      });
+      );
     }
   }
 
