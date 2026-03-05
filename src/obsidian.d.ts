@@ -2,6 +2,29 @@ import "obsidian";
 import type { ILocaleOverride, IWeekStartOption } from "./settings";
 
 declare module "obsidian" {
+  interface CliData {
+    args: string[];
+    cwd: string;
+  }
+
+  type CliHandler = (args: CliData) => Promise<string>;
+
+  interface CliFlags {
+    [key: string]: {
+      description: string;
+      type?: "string" | "boolean";
+      required?: boolean;
+    };
+  }
+
+  interface Plugin {
+    registerCliHandler(
+      command: string,
+      description: string,
+      flags: CliFlags | null,
+      handler: CliHandler
+    ): void;
+  }
   interface IWeeklyNoteOptions {
     weeklyNoteFormat: string;
     weeklyNoteFolder: string;
